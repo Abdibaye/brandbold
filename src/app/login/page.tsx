@@ -1,105 +1,137 @@
-'use client'
-
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { LoginForm } from '@/components/auth/LoginForm'
-import { useAuth } from '@/libs/useAuth'
+"use client"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft, Mail, Lock, Sparkles } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const supabase = createClientComponentClient()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!loading && user) {
-      router.push('/dashboard')
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) throw error
+
+      if (data.user) {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An error occurred during login')
+    } finally {
+      setLoading(false)
     }
-  }, [user, loading, router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Left side - Login Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
-              Welcome back
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Don't have an account?{' '}
-              <button
-                onClick={() => router.push('/signup')}
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Sign up
-              </button>
-            </p>
-          </div>
-
-          <LoginForm />
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-gray-50 px-2 text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span className="sr-only">Sign in with Google</span>
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </button>
-
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span className="sr-only">Sign in with GitHub</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-600/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3"></div>
+        <div className="absolute top-1/2 left-1/2 w-[900px] h-[900px] bg-purple-600/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
       </div>
 
-      {/* Right side - Image/Pattern */}
-      <div className="hidden lg:block relative w-0 flex-1">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600">
-          <div className="absolute inset-0 bg-black/20" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white px-12">
-              <h2 className="text-4xl font-bold mb-4">Welcome to BrandBold</h2>
-              <p className="text-lg text-white/90">
-                Join us in revolutionizing the way brands connect with their audience.
+      {/* Back Button */}
+      <div className="relative z-10 pt-6 px-4">
+        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-white transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Link>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+        <Card className="w-full max-w-md bg-slate-800/80 backdrop-blur-sm border-slate-700/50">
+          <CardHeader className="space-y-2 pb-4">
+            <div className="flex items-center justify-center mb-1">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-600/20">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-emerald-200">
+              Welcome Back
+            </CardTitle>
+            <p className="text-slate-400 text-center text-sm">
+              Sign in to access your Brandbold profile
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <label htmlFor="email" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-700/50 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300"
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-700/50 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-300"
+                  placeholder="Enter your password"
+                />
+              </div>
+              <div className="flex items-center justify-end">
+                <Link href="/forgot-password" className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-600 text-white py-5 text-lg rounded-xl shadow-lg shadow-emerald-600/20 border border-emerald-500/20 transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <p className="text-slate-400 text-sm">
+                Don't have an account?{" "}
+                <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+                  Create one
+                </Link>
               </p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
