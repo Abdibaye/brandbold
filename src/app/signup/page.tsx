@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createUserProfile } from '@/libs/user'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -37,7 +38,9 @@ export default function SignupPage() {
       if (error) throw error
 
       if (data.user) {
-        router.push('/dashboard')
+        // Create user profile after successful signup
+        await createUserProfile(data.user.id);
+        router.push('/complete-profile')
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'An error occurred during signup')
