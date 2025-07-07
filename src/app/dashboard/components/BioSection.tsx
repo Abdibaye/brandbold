@@ -1,6 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 interface BioSectionProps {
   isDarkMode: boolean
@@ -9,6 +14,7 @@ interface BioSectionProps {
 
 export const BioSection = ({ isDarkMode, bio }: BioSectionProps) => {
   const [showFullBio, setShowFullBio] = useState(false)
+  const [prompt, setPrompt] = useState("")
 
   return (
     <section className={`rounded-2xl border p-8 mb-8 shadow-sm hover:shadow-md transition-shadow duration-300 ${
@@ -17,6 +23,49 @@ export const BioSection = ({ isDarkMode, bio }: BioSectionProps) => {
         : 'bg-white border-gray-200'
     }`}>
       <h2 className="text-2xl font-bold mb-6 bg-gradient-to-r from-[#10b981] to-[#34d399] bg-clip-text text-transparent">About</h2>
+      <div className="flex justify-end mb-4">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button 
+              variant="default" 
+              size="lg" 
+              className="gap-2 shadow-lg ring-2 ring-[#10b981] ring-offset-2 animate-pulse"
+            >
+              <Sparkles className="w-5 h-5 text-[#10b981]" />
+              <span className="font-semibold">AI Generate</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent 
+            showCloseButton
+            className="bg-white dark:bg-gray-900 border-2 border-[#10b981] shadow-2xl rounded-2xl p-8 max-w-lg w-full relative"
+          >
+            <div className="absolute -top-2 left-0 w-full h-2 bg-gradient-to-r from-[#10b981] to-[#34d399] rounded-t-2xl" />
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-[#10b981]">
+                <Sparkles className="w-6 h-6" />
+                Generate Bio with AI
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 dark:text-gray-300 text-base mt-2">
+                Describe yourself or what you want in your bio. This will help the AI generate a personalized summary.
+              </DialogDescription>
+            </DialogHeader>
+            <Textarea
+              value={prompt}
+              onChange={e => setPrompt(e.target.value)}
+              placeholder="e.g. Senior developer, loves startups, 8+ years experience..."
+              className="mb-2 mt-4 bg-white dark:bg-gray-800 border-2 border-[#10b981] focus-visible:ring-2 focus-visible:ring-[#10b981] text-base text-gray-800 dark:text-gray-100 placeholder:text-gray-400 rounded-lg shadow-sm min-h-[90px]"
+              rows={4}
+              autoFocus
+            />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="secondary" className="font-semibold px-6 py-2 rounded-lg">Cancel</Button>
+              </DialogClose>
+              <Button variant="default" disabled className="bg-[#10b981] hover:bg-[#059669] text-white font-semibold px-6 py-2 rounded-lg">Generate</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
       <div className="space-y-6">
         {/* Bio Header with Stats */}
         <div className="flex flex-wrap gap-4 mb-6">

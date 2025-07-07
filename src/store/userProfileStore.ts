@@ -14,30 +14,29 @@ interface UserProfileState {
 }
 
 export const useUserProfileStore = create<UserProfileState>((set) => ({
-  profile: null,
+  profile: {
+    id: 'dummy-user-id',
+    username: 'alexwarnner',
+    full_name: 'Alex warnner',
+    phone_number: '123-456-7890',
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80',
+    website: 'https://alexwarnner.com',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
   loading: false,
   error: null,
 
   fetchProfile: async (userId) => {
-    set({ loading: true, error: null });
-    try {
-      const userProfile = await getUserProfile(userId);
-      set({ profile: userProfile, loading: false });
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error fetching profile in store:', err);
-    }
+    set({ loading: false, error: null });
+    // No-op, just use dummy data
   },
 
   updateProfile: async (userId, updates) => {
-    set({ loading: true, error: null });
-    try {
-      const updatedProfile = await updateUserProfile(userId, updates);
-      set({ profile: updatedProfile, loading: false });
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error updating profile in store:', err);
-      throw err; // Re-throw to allow component to handle errors
-    }
+    set((state) => ({
+      profile: { ...state.profile!, ...updates, updated_at: new Date().toISOString() },
+      loading: false,
+      error: null,
+    }));
   },
 })); 

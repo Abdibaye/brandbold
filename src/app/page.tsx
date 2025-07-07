@@ -132,7 +132,7 @@ export default function BrandboldLanding() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-3xl font-bold text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-emerald-200">
-                      What's in Andrew's Profile:
+                      What's in Alex's Profile:
                     </h3>
                   </div>
 

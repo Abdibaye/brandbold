@@ -55,5 +55,5 @@ export async function updateUserProfile(userId: string, updates: Partial<Profile
     throw error
   }
 
-  return data
+  return data 
 } 

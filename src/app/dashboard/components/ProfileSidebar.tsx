@@ -87,7 +87,7 @@ export function ProfileSidebar({ isDarkMode, toggleDarkMode }: ProfileSidebarPro
     name: profile.full_name || profile.username || 'New User', // Use full_name, fallback to username
     username: profile.username || '', // Use username from profile
     headline: profile.website || '', // Using website as a placeholder for headline
-    avatarUrl: profile.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80', // Use avatar_url, fallback to a default
+    avatarUrl: 'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250', // Use provided Gravatar URL
     socialLinks: [
       { platform: 'GitHub', url: '#', icon: FiGithub },
       { platform: 'LinkedIn', url: '#', icon: FiLinkedin },

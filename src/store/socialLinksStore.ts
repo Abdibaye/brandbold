@@ -1,10 +1,16 @@
 import { create } from 'zustand';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Database } from '@/libs/database.types';
 
-type SocialLink = Database['public']['Tables']['social_links']['Row'];
-type SocialLinkInsert = Database['public']['Tables']['social_links']['Insert'];
-type SocialLinkUpdate = Database['public']['Tables']['social_links']['Update'];
+type SocialLink = {
+  id: string;
+  profile_id: string;
+  platform: string;
+  url: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+};
+type SocialLinkInsert = Omit<SocialLink, 'id' | 'created_at' | 'updated_at'>;
+type SocialLinkUpdate = Partial<SocialLink>;
 
 interface SocialLinksState {
   links: SocialLink[];
@@ -18,125 +24,51 @@ interface SocialLinksState {
 }
 
 export const useSocialLinksStore = create<SocialLinksState>((set, get) => ({
-  links: [],
+  links: [
+    { id: '1', profile_id: 'dummy-user-id', platform: 'GitHub', url: 'https://github.com/dummyuser', display_order: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '2', profile_id: 'dummy-user-id', platform: 'LinkedIn', url: 'https://linkedin.com/in/dummyuser', display_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: '3', profile_id: 'dummy-user-id', platform: 'Twitter', url: 'https://twitter.com/dummyuser', display_order: 2, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+  ],
   loading: false,
   error: null,
 
   fetchLinks: async (profileId: string) => {
-    set({ loading: true, error: null });
-    try {
-      const supabase = createClientComponentClient<Database>();
-      const { data, error } = await supabase
-        .from('social_links')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('display_order', { ascending: true });
-
-      if (error) throw error;
-      set({ links: data || [], loading: false });
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error fetching social links:', err);
-    }
+    set({ loading: false, error: null });
+    // No-op, just use dummy data
   },
 
   addLink: async (link: SocialLinkInsert) => {
-    set({ loading: true, error: null });
-    try {
-      const supabase = createClientComponentClient<Database>();
-      const { data, error } = await supabase
-        .from('social_links')
-        .insert(link)
-        .select()
-        .single();
-
-      if (error) throw error;
-      set(state => ({ 
-        links: [...state.links, data], 
-        loading: false 
-      }));
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error adding social link:', err);
-      throw err;
-    }
+    set(state => ({
+      links: [...state.links, { ...link, id: Math.random().toString(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() }],
+      loading: false,
+      error: null,
+    }));
   },
 
   updateLink: async (linkId: string, updates: SocialLinkUpdate) => {
-    set({ loading: true, error: null });
-    try {
-      const supabase = createClientComponentClient<Database>();
-      const { data, error } = await supabase
-        .from('social_links')
-        .update(updates)
-        .eq('id', linkId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      set(state => ({
-        links: state.links.map(link => 
-          link.id === linkId ? { ...link, ...data } : link
-        ),
-        loading: false
-      }));
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error updating social link:', err);
-      throw err;
-    }
+    set(state => ({
+      links: state.links.map(link => link.id === linkId ? { ...link, ...updates, updated_at: new Date().toISOString() } : link),
+      loading: false,
+      error: null,
+    }));
   },
 
   deleteLink: async (linkId: string) => {
-    set({ loading: true, error: null });
-    try {
-      const supabase = createClientComponentClient<Database>();
-      const { error } = await supabase
-        .from('social_links')
-        .delete()
-        .eq('id', linkId);
-
-      if (error) throw error;
-      set(state => ({
-        links: state.links.filter(link => link.id !== linkId),
-        loading: false
-      }));
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error deleting social link:', err);
-      throw err;
-    }
+    set(state => ({
+      links: state.links.filter(link => link.id !== linkId),
+      loading: false,
+      error: null,
+    }));
   },
 
   reorderLinks: async (linkIds: string[]) => {
-    set({ loading: true, error: null });
-    try {
-      const supabase = createClientComponentClient<Database>();
-      
-      // Update each link's display_order
-      const updates = linkIds.map((id, index) => ({
-        id,
-        display_order: index
-      }));
-
-      const { error } = await supabase
-        .from('social_links')
-        .upsert(updates);
-
-      if (error) throw error;
-      
-      // Update local state
-      set(state => ({
-        links: state.links.map(link => {
-          const newOrder = linkIds.indexOf(link.id);
-          return newOrder !== -1 ? { ...link, display_order: newOrder } : link;
-        }),
-        loading: false
-      }));
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
-      console.error('Error reordering social links:', err);
-      throw err;
-    }
-  }
+    set(state => ({
+      links: linkIds.map((id, index) => {
+        const link = state.links.find(l => l.id === id);
+        return link ? { ...link, display_order: index } : null;
+      }).filter(Boolean) as SocialLink[],
+      loading: false,
+      error: null,
+    }));
+  },
 })); 
