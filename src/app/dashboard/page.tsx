@@ -51,8 +51,8 @@ export default function Page() {
 
   // Dummy user data (replace with real data or props)
   const user = {
-    name: "Andrew Green",
-    username: "@abdibaye",
+    name: "Alex warnner",
+    username: "@alexwarnner",
     headline: "Full Stack Developer & Tech Entrepreneur",
     avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&auto=format",
     bio: `🚀 Entrepreneur | CTO | Tech Leader

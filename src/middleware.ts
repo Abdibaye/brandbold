@@ -44,7 +44,7 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession();
 
   const authRoutes = ['/login', '/signup']
-  const protectedRoutes = ['/dashboard']; // Routes that require authentication and potentially profile completion
+  const protectedRoutes: string[] = []; // No protected routes, dashboard is now public
   const completeProfileRoute = '/complete-profile'; // The profile completion route
 
   const isAuthRoute = authRoutes.includes(pathname);
